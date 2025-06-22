@@ -65,6 +65,7 @@ class _UnitFormScreenState extends State<UnitFormScreen> {
         final newUnit = UnitModel(
           id: const Uuid().v4(), // Generate a valid UUID instead of using timestamp
           title: _titleController.text.trim(),
+          description: 'Default description',
           unitNumber: int.parse(_unitNumberController.text.trim()),
           chapterCount: int.parse(_chapterCountController.text.trim()),
           completed: false,
@@ -78,6 +79,7 @@ class _UnitFormScreenState extends State<UnitFormScreen> {
         final updatedUnit = UnitModel(
           id: widget.unit!.id,
           title: _titleController.text.trim(),
+          description: widget.unit!.description, // Add this line
           unitNumber: int.parse(_unitNumberController.text.trim()),
           chapterCount: int.parse(_chapterCountController.text.trim()),
           completed: widget.unit!.completed,

@@ -25,29 +25,70 @@ class AuthService {
       return null;
     }
   }
+  Future<UserModel?> signUp(String email, String password, String name, String userType) async {
+  try {
+    debugPrint('Attempting signup with email: $email');
+    
+    final response = await _supabaseClient.auth.signUp(
+      email: email,
+      password: password,
+    );
+    
+    debugPrint('Signup response: ${response.user?.id}');
+    
+    if (response.user == null) return null;
 
+    // INSERT DATA KE TABLE USERS (bagian yang hilang)
+    final userData = {
+      'id': response.user!.id,
+      'email': email,
+      'name': name,
+      'user_type': userType,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    final userResponse = await _supabaseClient
+        .from('users')
+        .insert(userData)
+        .select()
+        .single();
+
+    debugPrint('User data inserted: $userResponse');
+    
+    return UserModel.fromJson(userResponse);
+    
+  } catch (e) {
+    debugPrint('Detailed signup error: $e');
+    if (e is AuthException) {
+      debugPrint('Auth error code: ${e.statusCode}');
+      debugPrint('Auth error message: ${e.message}');
+    }
+    rethrow;
+  }
+}
+  
   // Sign in with email and password
   Future<UserModel?> signIn(String email, String password) async {
-    try {
-      final response = await _supabaseClient.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      
-      if (response.user == null) return null;
+  try {
+    final response = await _supabaseClient.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    
+    if (response.user == null) return null;
 
-      final userData = await _supabaseClient
-          .from('users')
-          .select()
-          .eq('id', response.user!.id)
-          .single();
+    final userData = await _supabaseClient
+        .from('users')
+        .select()
+        .eq('id', response.user!.id)
+        .single();
 
-      return UserModel.fromJson(userData);
-    } catch (e) {
-      debugPrint('Error signing in: $e');
-      rethrow;
-    }
+    return UserModel.fromJson(userData);
+  } catch (e) {
+    debugPrint('Error signing in: $e');
+    rethrow;
   }
+}
 
   // Sign out
   Future<void> signOut() async {

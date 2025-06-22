@@ -1,4 +1,4 @@
-// lib/screens/admin/admin_home_screen.dart
+// lib/screens/admin/admin_home_scree_deldart
 // ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use, prefer_const_constructors
 
 import 'package:flutter/material.dart';
@@ -89,7 +89,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _deleteUnit(unit.id);
+              if (unit.id != null) {
+  _deleteUnit(unit.id!);
+}
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Hapus'),

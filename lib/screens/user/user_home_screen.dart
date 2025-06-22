@@ -1,14 +1,20 @@
-// lib/screens/user/user_home_screen.dart
-// ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use, prefer_const_constructors
-
 import 'package:flutter/material.dart';
-import 'package:flutter_ngebut/constants/app_assets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_ngebut/models/unit_model.dart';
-import 'package:flutter_ngebut/screens/auth/user_type_screen.dart';
+import 'package:flutter_ngebut/models/user_model.dart';
 import 'package:flutter_ngebut/services/auth_service.dart';
 import 'package:flutter_ngebut/services/database_service.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter_ngebut/screens/auth/user_type_screen.dart';
+import 'package:flutter_ngebut/screens/user/community_screen.dart';
+import 'package:flutter_ngebut/widgets/unit_card.dart';
+import 'package:flutter_ngebut/widgets/youtube_player_modal.dart';
+import 'package:flutter_ngebut/constants/app_assets.dart';
+import 'dictionary_screen.dart';
+import 'package:flutter_ngebut/constants/app_styles.dart'; // Added import for AppColors and AppStyles
+import 'profile_screen.dart';
+
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -179,7 +185,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   _isPlayerReady = true;
                                   _isVideoLoading = false;
                                 });
-                                // Tunggu sebentar sebelum memutar video
                                 Future.delayed(const Duration(seconds: 1), () {
                                   if (_youtubeController != null && mounted) {
                                     _youtubeController!.play();
@@ -227,10 +232,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     if (title.toLowerCase().contains('salam')) {
       return FontAwesomeIcons.hand;
     } else if (title.toLowerCase().contains('angka') || 
-              title.toLowerCase().contains('hitung')) {
+               title.toLowerCase().contains('hitung')) {
       return FontAwesomeIcons.calculator;
     } else if (title.toLowerCase().contains('percakapan') || 
-              title.toLowerCase().contains('sehari')) {
+               title.toLowerCase().contains('sehari')) {
       return FontAwesomeIcons.comments;
     }
     return FontAwesomeIcons.book;
@@ -240,225 +245,228 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: IndexedStack(
+        index: _selectedTabIndex,
         children: [
-          // Blue curved top section
-          Container(
-            padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-            decoration: const BoxDecoration(
-              color: Color(0xFF00B4D8),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-            ),
-            child: Stack(
+          // Tab 0: Beranda
+          SingleChildScrollView(
+            child: Column(
               children: [
-                // Decorative circles
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF7FC1E9).withOpacity(0.15),
-                      shape: BoxShape.circle,
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF00B4D8),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
                     ),
                   ),
-                ),
-                Positioned(
-                  top: 80,
-                  right: 40,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF7FC1E9).withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-                // Content on top of decorative elements
-                Column(
-                  children: [
-                    // Top header with greeting and avatar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'HALO, PENGGUNA!',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Siap belajar hari ini?',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: Image.asset(
-                            AppAssets.avatar,
-                            width: 56,
-                            height: 56,
-                            fit: BoxFit.cover,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 16,
+                        left: 16,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7FC1E9).withOpacity(0.15),
+                            shape: BoxShape.circle,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Achievement cards
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildAchievementCard(
-                            icon: FontAwesomeIcons.trophy,
-                            value: '0',
-                            label: 'PENCAPAIAN',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildAchievementCard(
-                            icon: FontAwesomeIcons.fire,
-                            value: '0',
-                            label: 'REKOR SAAT INI',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          
-          // Main content
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 15,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF00B4D8),
                       ),
-                    )
-                  : _units.isEmpty
+                      Positioned(
+                        top: 80,
+                        right: 40,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7FC1E9).withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text(
+                                    'HALO, PENGGUNA!',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Siap belajar hari ini?',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(28),
+                                child: Image.asset(
+                                  AppAssets.avatar,
+                                  width: 56,
+                                  height: 56,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildAchievementCard(
+                                  icon: FontAwesomeIcons.trophy,
+                                  value: '0',
+                                  label: 'PENCAPAIAN',
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildAchievementCard(
+                                  icon: FontAwesomeIcons.fire,
+                                  value: '0',
+                                  label: 'REKOR SAAT INI',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 15,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: _isLoading
                       ? const Center(
-                          child: Text(
-                            'Belum ada unit pembelajaran',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF00B4D8),
                           ),
                         )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _units.length,
-                          itemBuilder: (context, index) {
-                            final unit = _units[index];
-                            return _buildUnitCard(
-                              title: unit.title,
-                              unitNumber: unit.unitNumber,
-                              chapterCount: unit.chapterCount,
-                              icon: _getIconForUnit(unit.title),
-                              onTap: () {
-                                // Tampilkan modal konfirmasi
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Konfirmasi'),
-                                      content: Text('Yakin ingin membuka unit: ${unit.title}?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('Tidak'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            if (unit.youtubeLink != null) {
-                                              // Extract video ID from YouTube URL
-                                              String? videoId;
-                                              try {
-                                                videoId = YoutubePlayer.convertUrlToId(unit.youtubeLink!);
-                                                if (videoId == null) {
-                                                  // Coba ekstrak ID manual jika format URL tidak standar
-                                                  final uri = Uri.parse(unit.youtubeLink!);
-                                                  if (uri.host.contains('youtube.com')) {
-                                                    videoId = uri.queryParameters['v'];
-                                                  } else if (uri.host.contains('youtu.be')) {
-                                                    videoId = uri.pathSegments.last;
+                      : _units.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'Belum ada unit pembelajaran',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(16),
+                              itemCount: _units.length,
+                              itemBuilder: (context, index) {
+                                final unit = _units[index];
+                                return _buildUnitCard(
+                                  title: unit.title,
+                                  unitNumber: unit.unitNumber,
+                                  chapterCount: unit.chapterCount,
+                                  icon: _getIconForUnit(unit.title),
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Konfirmasi'),
+                                          content: Text('Yakin ingin membuka unit: ${unit.title}?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Tidak'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                if (unit.youtubeLink != null) {
+                                                  String? videoId;
+                                                  try {
+                                                    videoId = YoutubePlayer.convertUrlToId(unit.youtubeLink!);
+                                                    if (videoId == null) {
+                                                      final uri = Uri.parse(unit.youtubeLink!);
+                                                      if (uri.host.contains('youtube.com')) {
+                                                        videoId = uri.queryParameters['v'];
+                                                      } else if (uri.host.contains('youtu.be')) {
+                                                        videoId = uri.pathSegments.last;
+                                                      }
+                                                    }
+                                                  } catch (e) {
+                                                    debugPrint('Error parsing YouTube URL: $e');
                                                   }
-                                                }
-                                              } catch (e) {
-                                                debugPrint('Error parsing YouTube URL: $e');
-                                              }
 
-                                              if (videoId != null) {
-                                                _showYouTubeVideo(videoId);
-                                              } else {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text('URL video tidak valid'),
-                                                    backgroundColor: Colors.red,
-                                                  ),
-                                                );
-                                              }
-                                            } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Video belum tersedia'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            }
-                                          },
-                                          child: const Text('Ya'),
-                                        ),
-                                      ],
+                                                  if (videoId != null) {
+                                                    _showYouTubeVideo(videoId);
+                                                  } else {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text('URL video tidak valid'),
+                                                        backgroundColor: Colors.red,
+                                                      ),
+                                                    );
+                                                  }
+                                                } else {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text('Video belum tersedia'),
+                                                      backgroundColor: Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              child: const Text('Ya'),
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     );
                                   },
                                 );
                               },
-                            );
-                          },
-                        ),
+                            ),
+                ),
+              ],
             ),
           ),
+          // Tab 1: Komunitas
+          const CommunityScreen(),
+          // Tab 2: Placeholder
+          // Tab 2: Kamus
+  DictionaryScreen(),
+          // Tab 3: Profile/Logout (empty as it's handled by onTap)
+           ProfileScreen(),
         ],
       ),
-      // Bottom navigation bar
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -485,20 +493,77 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             ),
             _buildNavItem(
               icon: FontAwesomeIcons.users,
+              label: 'Komunitas',
               index: 1,
-              showLabel: false,
+              showLabel: true,
             ),
             _buildNavItem(
-              icon: FontAwesomeIcons.fileAlt,
-              index: 2,
-              showLabel: false,
-            ),
+      icon: FontAwesomeIcons.fileAlt,
+      label: 'Kamus',
+      index: 2,
+      showLabel: false,
+    ),
             _buildNavItem(
-              icon: FontAwesomeIcons.userCircle,
-              index: 3,
-              showLabel: false,
-              onTap: _signOut,
+      icon: FontAwesomeIcons.userCircle,
+      label: 'Profile',
+      index: 3,
+      showLabel: false,
+      // Hapus onTap: _signOut, biarkan default behavior
+    ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    String? label,
+    required int index,
+    bool showLabel = true,
+    VoidCallback? onTap,
+  }) {
+    final isActive = _selectedTabIndex == index;
+
+    return InkWell(
+      onTap: onTap ?? () {
+        setState(() {
+          _selectedTabIndex = index;
+        });
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: showLabel && isActive
+            ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
+            : const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFE6F4FB) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FaIcon(
+              icon,
+              color: isActive 
+                  ? const Color(0xFF5CA4D1) 
+                  : const Color(0xFF8B94B2),
+              size: 18,
             ),
+            if (showLabel && isActive)
+              Row(
+                children: [
+                  const SizedBox(width: 8),
+                  Text(
+                    label ?? 'Komunitas',
+                    style: const TextStyle(
+                      color: Color(0xFF5CA4D1),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -584,7 +649,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             blurRadius: 6,
             offset: const Offset(0, 4),
           ),
-        ],
+],
       ),
       child: Material(
         color: Colors.transparent,
@@ -658,57 +723,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    String? label,
-    required int index,
-    bool showLabel = true,
-    VoidCallback? onTap,
-  }) {
-    final isActive = _selectedTabIndex == index;
-    
-    return InkWell(
-      onTap: onTap ?? () {
-        setState(() {
-          _selectedTabIndex = index;
-        });
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: showLabel && isActive
-            ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-            : const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFE6F4FB) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FaIcon(
-              icon,
-              color: isActive 
-                  ? const Color(0xFF5CA4D1) 
-                  : const Color(0xFF8B94B2),
-              size: 18,
-            ),
-            if (showLabel && isActive) ...[
-              const SizedBox(width: 8),
-              Text(
-                label!,
-                style: const TextStyle(
-                  color: Color(0xFF5CA4D1),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ],
         ),
       ),
     );

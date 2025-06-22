@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ngebut/screens/auth/user_type_screen.dart';
-import 'package:flutter_ngebut/constants/app_colors.dart';
 import 'package:flutter_ngebut/supabase_config.dart';
+import 'package:flutter_ngebut/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Supabase
   await SupabaseConfig.initialize();
-  
   runApp(const MyApp());
 }
 
@@ -18,19 +14,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bisindo Learning App',
-      debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
       theme: ThemeData(
-        primaryColor: AppColors.primary,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-        ),
-        fontFamily: 'Inter',
-        scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const UserTypeScreen(),
+      home: const SplashScreen(), // Ganti dari UserTypeScreen ke SplashScreen
+      debugShowCheckedModeBanner: false,
     );
   }
 }
